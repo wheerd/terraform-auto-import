@@ -13,3 +13,5 @@ jobs:
       uses: actions/checkout@v2
     - name: run
       uses: cedrickring/golang-action@1.5.2
+      env:
+        GO111MODULE: "on"

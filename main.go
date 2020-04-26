@@ -4,24 +4,31 @@ import (
 	"log"
 	"os"
 
-	"github.com/wheerd/terraform-auto-import/v2/commands"
+	"github.com/wheerd/terraform-auto-import/v2/core"
 
-	"github.com/mitchellh/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	c := cli.NewCLI("terraform-auto-import", "1.0.0")
-	c.Args = os.Args[1:]
-	c.Commands = map[string]cli.CommandFactory{
-		"list-new": func() (cli.Command, error) {
-			return &commands.ListNewResourcesCommand{}, nil
+	var runconfig core.RunConfig
+
+	app := &cli.App{
+		Name:  "terraform-auto-import",
+		Usage: "Automatically import existing AWS resources into terraform",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "tfplan",
+				Usage:       "Load terraform plan from `FILE`",
+				Destination: &runconfig.TerraformPlanPath,
+			},
+		},
+		Action: func(c *cli.Context) error {
+			return core.Run(&runconfig)
 		},
 	}
 
-	exitStatus, err := c.Run()
+	err := app.Run(os.Args)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
-
-	os.Exit(exitStatus)
 }
